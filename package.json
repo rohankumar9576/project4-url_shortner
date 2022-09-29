@@ -4,7 +4,8 @@
   "description": "project for url shortner",
   "main": "index.js",
   "scripts": {
-    "test": "kuch bhi"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,10 @@
   "homepage": "https://github.com/rohankumar9576/project4-url_shortner#readme",
   "dependencies": {
     "express": "^4.18.1",
-    "mongoose": "^6.6.2"
+    "mongoose": "^6.6.2",
+    "shortid": "^2.2.16",
+    "valid-url": "^1.0.9",
+    "validator": "^13.7.0",
+    "validid": "^2.2.0"
   }
 }
