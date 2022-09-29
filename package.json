@@ -1,0 +1,23 @@
+{
+  "name": "project4-url_shortner",
+  "version": "1.0.0",
+  "description": "project for url shortner",
+  "main": "index.js",
+  "scripts": {
+    "test": "kuch bhi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohankumar9576/project4-url_shortner.git"
+  },
+  "author": "Adesh, Rohan, Naman, Rohit",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rohankumar9576/project4-url_shortner/issues"
+  },
+  "homepage": "https://github.com/rohankumar9576/project4-url_shortner#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "mongoose": "^6.6.2"
+  }
+}
