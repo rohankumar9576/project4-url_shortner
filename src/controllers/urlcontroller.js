@@ -1,7 +1,7 @@
 const urlModel = require("../models/urlModel")
 const shortId = require("shortid")
-//const validUrl=require("valid-url")
-const validation = require("validator")
+const validUrl = require("valid-url")
+//const validation = require("validator")
 
 const isValidRequestBody = (RequestBody) => {
     if (!Object.keys(RequestBody).length > 0) return false;
@@ -15,32 +15,56 @@ const isValid = (value) => {
 }
 
 const createUrl = async function (req, res) {
-    let data = req.body
-    let longUrl = req.body.longUrl
+    try {
+        let data = req.body
+        let longUrl = req.body.longUrl
 
-    if (!isValid(data)) {
-        return res.status(400).send({ status: false, message: "please enter data" })
+        if (!isValid(data)) {
+            return res.status(400).send({ status: false, message: "please enter data" })
+        }
+
+        if (!validUrl.isUri(longUrl)) {
+            return res.status(400).send({ status: false, message: "please enter valid url" })
+        }
+        let uniqueUrl = await urlModel.findOne({ longUrl: longUrl })
+        if (uniqueUrl) {
+            return res.status(400).send({ status: false, message: "Url already exists" })
+        }
+
+
+        let urlCode = shortId.generate().toLowerCase()
+        let shortUrl = `https://localhost:3000/${urlCode}`
+
+        data.urlCode = urlCode
+        data.shortUrl = shortUrl
+
+        savedData = await urlModel.create(data)
+        let obj = { urlCode: savedData.urlCode, shortUrl: savedData.shortUrl, longUrl: savedData.longUrl }
+        res.status(201).send({ status: true, message: "url successful created", data: obj })
     }
-
-    if (!isValid(longUrl)) {
-        return res.status(400).send({ status: false, message: "please enter url" })
+    catch (err) {
+        return res.status(500).send({ status: false, message: "server issue" })
     }
-    let uniqueUrl = await urlModel.findOne({ longUrl: longUrl })
-    if (uniqueUrl) {
-        return res.status(400).send({ status: false, message: "Url already exists" })
+}
+
+
+const getUrl = async function (req, res) {
+    try {
+        let data = req.params.urlCode
+        if (!data) {
+            return res.status(400).send({ message: "urlCode must present" })
+        }
+
+        let redirect = await urlModel.findOne({ urlCode: data }).select({ longUrl: 1, _id: 0 })
+        if (!redirect) {
+            return res.status(404).send({ message: "longUrl not found" })
+        }
+        return res.status(302).redirect(redirect.longUrl)
     }
-    if (!(/^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})?$/).test(longUrl)) {
-        return res.status(400).send({ status: false, message: "invalid base url" })
+    catch (err) {
+        return res.status(500).send({ status: false, message: "server issue" })
     }
-
-    let urlCode = shortId.generate().toLowerCase()
-    let shortUrl = `https://localhost:3000/${urlCode}`
-
-    data.urlCode = urlCode
-    data.shortUrl = shortUrl
-
-    savedData = await urlModel.create(data)
-    res.status(201).send({ status: false, message: "url successful created", data: savedData })
 }
 
 module.exports.createUrl = createUrl
+module.exports.getUrl = getUrl
