@@ -19,8 +19,6 @@ redisClient.on("connect", async function () {
     console.log("Connected to Redis..");
 });
 
-
-
 //1. connect to the server
 //2. use the commands :
 
@@ -28,9 +26,6 @@ redisClient.on("connect", async function () {
 
 const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
-
-
-
 
 
 const isValid = (value) => {
@@ -47,26 +42,27 @@ const createUrl = async function (req, res) {
         if (!Object.keys(data).length > 0) {
             return res.status(400).send({ status: false, message: "Please enter data" })
         }
+
         if (!isValid(longUrl)) {
             return res.status(400).send({ status: false, message: "Please enter URL this is mandatory" })
         }
-        if (!isValid(data)) {
-            return res.status(400).send({ status: false, message: "please enter data" })
-        }
+
         if (!validUrl.isUri(longUrl)) {
             return res.status(400).send({ status: false, message: "please enter valid url" })
         }
-        let cahcedUrleData = await GET_ASYNC(`${longUrl}`)
-        let strconvert = JSON.parse(cahcedUrleData)
-        if (strconvert)
-            return res.status(400).send({ message: "Url already exists" })
+
+        let cachedData = await GET_ASYNC(`${longUrl}`)
+        let strconvert = JSON.parse(cachedData)
+
+        if (strconvert) {
+            return res.status(200).send({ status: true, message: "url data from cache", data: strconvert })
+        }
         else {
             let uniqueUrl = await urlModel.findOne({ longUrl: longUrl })
             if (uniqueUrl) {
                 return res.status(400).send({ status: false, message: "Url already exists" })
             }
         }
-
         let urlCode = shortId.generate().toLowerCase()
         let shortUrl = `https://localhost:3000/${urlCode}`
         data.urlCode = urlCode
@@ -86,26 +82,20 @@ const createUrl = async function (req, res) {
 const getUrl = async (req, res) => {
     try {
         let data = req.params.urlCode
+        let cachedData = await GET_ASYNC(`${data}`)
+        let convertedData = JSON.parse(cachedData)
 
-        let cahcedUrleData = await GET_ASYNC(`${data}`)
-        let convert = JSON.parse(cahcedUrleData)
-        // console.log(cahcedUrleData)
-
-        if (convert)
-            return res.status(302).redirect(convert.longUrl)
-
-        if (!data)
-            return res.status(400).send({ status: false, message: " please enter valid url" })
-        if (!shortId.isValid(data))
-            return res.status(400).send({ status: false, message: "urlcode invalid" })
+        if (convertedData) {
+            return res.status(302).redirect(convertedData.longUrl)
+        }
 
         let checkUrlCode = await urlModel.findOne({ urlCode: data })
-        if (!checkUrlCode)
+        if (!checkUrlCode) {
             return res.status(404).send({ status: false, message: "url not present" })
-        await SET_ASYNC(`${data}`, JSON.stringify(checkUrlCode))
-        
-        res.status(302).redirect(checkUrlCode.longUrl)
+        }
 
+        await SET_ASYNC(`${data}`, JSON.stringify(checkUrlCode))
+        return res.status(302).redirect(checkUrlCode.longUrl)
     }
     catch (err) {
         res.status(500).send({ status: false, message: err.message })

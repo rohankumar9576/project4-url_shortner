@@ -6,7 +6,6 @@ const route=require("./route/route");
 
 app.use(express.json());
 
-
 mongoose.connect("mongodb+srv://bittushri8224:lyNrXnwy17jk4lFa@cluster0.ii3dqef.mongodb.net/group61",
 {
     useNewUrlParser:true
