@@ -3,6 +3,7 @@ const shortId = require("shortid")
 const validUrl = require("valid-url")
 const redis = require('redis')
 const { promisify } = require('util')
+const axios= require('axios')
 
 
 //Connect to redis
@@ -47,10 +48,25 @@ const createUrl = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please enter URL this is mandatory" })
         }
 
-        if (!validUrl.isUri(longUrl)) {
+        if (!validUrl.isWebUri(longUrl)) {
             return res.status(400).send({ status: false, message: "please enter valid url" })
         }
 
+        let objcts = {
+            method: "get",
+            url: longUrl
+        }
+      
+        let urlFound = false;
+        await axios(objcts)
+            .then((res) => {
+                if (res.status == 201 || res.status == 200) urlFound = true;
+            })
+            .catch((err) => { });
+        if (!urlFound) {
+            return res.status(400).send({ status: false, message: "Please provide valid LongUrl" })
+        }
+      
         let cachedData = await GET_ASYNC(`${longUrl}`)
         let strconvert = JSON.parse(cachedData)
 
