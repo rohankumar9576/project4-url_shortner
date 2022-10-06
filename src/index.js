@@ -11,9 +11,9 @@ mongoose.connect("mongodb+srv://bittushri8224:lyNrXnwy17jk4lFa@cluster0.ii3dqef.
     useNewUrlParser:true
 }
 )
+
 .then(()=>console.log(" mongoDB is connected"))
 .catch((err)=>console.log(err))
-
 app.use('/',route)
 
 app.listen(process.env.PORT || 3000, function(){

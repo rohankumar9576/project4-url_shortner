@@ -5,7 +5,7 @@ const redis = require('redis')
 const { promisify } = require('util')
 const axios= require('axios')
 
-
+//=======================😎😎😎😎😎😎=========================================================================================================================
 //Connect to redis
 const redisClient = redis.createClient(
     14014,
@@ -34,6 +34,7 @@ const isValid = (value) => {
     if (typeof value === "string" && value.trim().length === 0) return false;
     return true;
 }
+//====================== 😮😮😮😮😮😮😮😮😮==============================================================================================================
 
 const createUrl = async function (req, res) {
     try {
@@ -52,6 +53,14 @@ const createUrl = async function (req, res) {
             return res.status(400).send({ status: false, message: "please enter valid url" })
         }
 
+        let cachedData = await GET_ASYNC(`${longUrl}`)
+        let strconvert = JSON.parse(cachedData)
+
+        if (strconvert) {
+            return res.status(200).send({ status: true, message: "url data from cache", data: strconvert })
+        }
+// ============================== 🙂🙂🙂🙂🙂🙂 ==========================================================================================================
+
         let objcts = {
             method: "get",
             url: longUrl
@@ -66,19 +75,12 @@ const createUrl = async function (req, res) {
         if (!urlFound) {
             return res.status(400).send({ status: false, message: "Please provide valid LongUrl" })
         }
-      
-        let cachedData = await GET_ASYNC(`${longUrl}`)
-        let strconvert = JSON.parse(cachedData)
-
-        if (strconvert) {
-            return res.status(200).send({ status: true, message: "url data from cache", data: strconvert })
-        }
-        else {
+        
             let uniqueUrl = await urlModel.findOne({ longUrl: longUrl })
             if (uniqueUrl) {
                 return res.status(400).send({ status: false, message: "Url already exists" })
             }
-        }
+        
         let urlCode = shortId.generate().toLowerCase()
         let shortUrl = `https://localhost:3000/${urlCode}`
         data.urlCode = urlCode
@@ -95,6 +97,7 @@ const createUrl = async function (req, res) {
     }
 }
 
+//========================= 😯😯😯😯😯😯😯========================================================================================================================
 
 const getUrl = async (req, res) => {
     try {
@@ -118,9 +121,6 @@ const getUrl = async (req, res) => {
         res.status(500).send({ status: false, message: err.message })
     }
 }
-
-
-
 
 
 module.exports = { createUrl, getUrl }
