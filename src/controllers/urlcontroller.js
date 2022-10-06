@@ -69,8 +69,9 @@ const createUrl = async function (req, res) {
         data.shortUrl = shortUrl
 
         savedData = await urlModel.create(data)
-        await SET_ASYNC(`${longUrl}`, JSON.stringify(savedData))
+        
         let obj = { urlCode: savedData.urlCode, shortUrl: savedData.shortUrl, longUrl: savedData.longUrl }
+        await SET_ASYNC(`${longUrl}`, JSON.stringify(obj))
         res.status(201).send({ status: true, message: "url successful created", data: obj })
     }
     catch (err) {
